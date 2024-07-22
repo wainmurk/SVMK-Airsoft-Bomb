@@ -53,6 +53,191 @@ void cls() {
   lcd.setCursor(0, 0);
 }
 
+void debugtest() {
+  bool flag;
+  cls();
+  lcdprint(debug);
+  lcd.setCursor(0, 1);
+  lcdprint(yesno);
+  var = keypad.waitForKey();
+  if (var == BT_SEL) {
+    cls();
+    lcdprint(dodefaults);
+
+    while (1) {
+      var = keypad.waitForKey();
+      if (var == BT_SEL) {
+        cls();
+        lcd.setCursor(4, 0);
+        SetDefaultValues();
+        delay(10);
+        lcdprint(done);
+        delay(500);
+        break;
+      }
+      if (var == BT_CANCEL) {
+        break;
+      }
+      if (var == BT_DOWN) return;
+    }
+
+    cls();
+    lcdprint(testrelay);
+    lcd.print("?");
+
+    while (1) {
+      var = keypad.waitForKey();
+      if (var == BT_SEL) {
+        flag = !flag;
+        if (flag) {
+          cls();
+          lcdprint(relayon);
+          digitalWrite(mosfet, !rtype);
+        } else {
+          cls();
+          lcdprint(relayoff);
+          digitalWrite(mosfet, rtype);
+        }
+      }
+      if (var == BT_CANCEL) {
+        digitalWrite(mosfet, rtype);
+        break;
+      }
+      if (var == BT_DOWN) {
+        digitalWrite(mosfet, rtype);
+        return;
+      }
+    }
+    SetReal5v();
+    cls();
+    lcdprint(testbl);
+    lcd.print("?");
+
+    while (1) {
+      var = keypad.waitForKey();
+      if (var == BT_SEL) {
+        DoTestBacklight();
+      }
+      if (var == BT_CANCEL) {
+        break;
+      }
+    }
+    if (var == BT_CANCEL) {
+      return;
+    }
+    if (var == BT_DOWN) return;
+  }
+}
+
+void SetDefaultValues() {
+  EEPROM.put(10, 100);
+  EEPROM.put(20, 5);
+  EEPROM.put(25, 2);
+  EEPROM.put(30, 1);
+  writeIntIntoEEPROM(40, 5000);
+  delay(20);
+  EEPROM.get(10, bright);
+  EEPROM.get(15, GAMEHOURS);
+  EEPROM.get(20, GAMEMINUTES);
+  EEPROM.get(25, colorofteama);
+  EEPROM.get(30, colorofteamb);
+  real_5v = readIntFromEEPROM(40);
+}
+
+void DoTestBacklight() {
+  int testbltime = 200;
+  strip.clear();
+  strip.fill(mRed);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.fill(mYellow);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.fill(mBlue);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.fill(mPurple);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.fill(mGreen);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.fill(mWhite);
+  strip.show();
+  delay(testbltime);
+  strip.clear();
+  strip.show();
+}
+
+void SetReal5v() {
+  cls();
+  input_voltage = (analogRead(A0) * (real_5v / 1000.0)) / 1023.0;  //вольты
+  lcdprint(battery);
+  lcd.setCursor(8, 0);
+  lcd.print(input_voltage);
+  lcd.setCursor(13, 0);
+  lcd.print("?");
+
+  while (1) {
+    var = keypad.waitForKey();
+
+    if (var == BT_CANCEL) {
+      cls();
+      lcdprint(setreal5vtext);
+
+      int digits[4] = { 0, 0, 0, 0 };
+      int index = 0;
+
+      while (index < 4) {
+        char key = keypad.getKey();
+        if (key != NO_KEY && isDigit(key)) {
+          digits[index] = key - '0';  // Преобразуем символ цифры в целое число
+          lcd.setCursor(index, 1);    // Устанавливаем курсор на второй строке
+          lcd.print(key);             // Выводим цифру на дисплей
+          index++;
+        }
+        if (index == 4) delay(300);
+      }
+
+      // Преобразование массива цифр в 4-значное число и запись в глобальную переменную
+      real_5v = 0;
+      for (int i = 0; i < 4; i++) {
+        real_5v = real_5v * 10 + digits[i];
+      }
+      cls();
+      writeIntIntoEEPROM(40, real_5v);
+      delay(20);
+      SetReal5v();
+      break;
+    }
+
+    if (var == BT_SEL) {
+      break;
+    }
+    if (var == BT_DOWN) return;
+  }
+}
+
+
+int readIntFromEEPROM(int address) {
+  byte byte1;
+  byte byte2;
+  EEPROM.get(address, byte1);
+  EEPROM.get(address + 1, byte2);
+  return (byte1 << 8) + byte2;
+}
+
+void writeIntIntoEEPROM(int address, int number) {
+  EEPROM.put(address, number >> 8);
+  EEPROM.put(address + 1, number & 0xFF);
+}
+
+
 void printTime(unsigned long minutos, unsigned long aTiempo) {
   //minutes
   if ((minutos - aTiempo / 60000) < 10) {

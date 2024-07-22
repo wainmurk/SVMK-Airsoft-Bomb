@@ -43,6 +43,7 @@ void setCode() {
         break;
       }
     }
+    if (i == 7) delay(300);
   }
 }
 void setPass() {
@@ -64,6 +65,7 @@ void setPass() {
         break;
       }
     }
+    if (i == 7) delay(300);
   }
 }
 

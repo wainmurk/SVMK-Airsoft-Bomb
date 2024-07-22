@@ -74,7 +74,7 @@ void domination() {
     //###########################CHECKINGS##################
 
     //Check If Game End
-    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0) {
+    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0 or minutos - aTime / 60000 > 40000000) {
       gameOver();
     }
 
@@ -234,16 +234,26 @@ void gameOver() {
       writeteamcolor(1);
     }
     delay(3000);
+    if (keypad.getKey() == BT_SEL) break;
     cls();
     teamtime(1);
     lcd.setCursor(5, 1);
     printTimeDom(redTime, false);
     delay(3000);
+    if (keypad.getKey() == BT_SEL) break;
     cls();
     teamtime(0);
     lcd.setCursor(5, 1);
     printTimeDom(greenTime, false);
     delay(3000);
+    if (keypad.getKey() == BT_SEL) break;
+    cls();
+    lcd.setCursor(2, 0);
+    lcdprint(pressa);
+    lcd.setCursor(3, 1);
+    lcdprint(toleave);
+    delay(3000);
+    if (keypad.getKey() == BT_SEL) break;
   }
   redTime = 0;
   greenTime = 0;

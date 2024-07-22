@@ -33,12 +33,13 @@ void search() {
     //###########################CHECKINGS##################
 
     //Check If Game End
-    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0) {
-      lcd.clear();
+    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0 or minutos - aTime / 60000 > 40000000) {
+      cls();
       while (1) {
+        lcd.setCursor(3, 1);
         lcdprint(endtime);
-        lcd.setCursor(0, 1);
-        lcd.print(F("DEFENDERES WIN "));
+        lcd.setCursor(1, 1);
+        lcdprint(defenderwins);
 
         delay(100);
         tone(tonepin, 2500, 100);
@@ -200,10 +201,11 @@ void destroy() {
     ////////HERE ARE THE TWO OPTIONS THAT ENDS THE GAME///////////
 
     ////TIME PASED AWAY AND THE BOMB EXPLODES
-    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0)  // Check if game ends
+    if (minutos - aTime / 60000 <= 0 && 59 - ((aTime / 1000) % 60) <= 0 or minutos - aTime / 60000 > 40000000)  // Check if game ends
     {
       explodeSplash();
     }
+    if (minutos - aTime / 60000 > 4000000000) { explodeSplash(); }
     //print time
 
     printTime(minutos, aTime);
@@ -225,13 +227,11 @@ void destroy() {
 
       setCode();  // we need to set the compare variable first
 
-      //then compare :D
-
       if (comparePassword()) {
         disarmedSplash();
       }
       lcd.clear();
-      lcd.setCursor(3, 0);
+      lcd.setCursor(1, 0);
       lcdprint(passerror);
       if (soundEnable) tone(tonepin, errorTone, 200);
       delay(500);
@@ -252,8 +252,9 @@ void destroy() {
         keypad.getKey();
         //check if game time runs out during the disabling
         aTime = millis() - iTime;
-        if ((minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0) || minutos - aTime / 60000 > 4000000000) {
+        if ((minutos - aTime / 60000 <= 0 && 59 - ((aTime / 1000) % 60) <= 0) || minutos - aTime / 60000 > 4000000000) {
           endGame = true;
+          explodeSplash();
         }
         timeCalcVar = (millis() - xTime) % 1000;
         if (timeCalcVar >= 0 && timeCalcVar <= 20) {

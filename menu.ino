@@ -1,7 +1,35 @@
 //##################MENUS###############################
 
 void menuPrincipal() {  //MAIN MENU
+  cls();
+
+  input_voltage = (analogRead(A0) * (real_5v / 1000.0)) / 1023.0;  //вольты
+  if (input_voltage < volt_min) {
+    lcd.setCursor(2, 0);
+    lcdprint(batterylow);
+    lcd.setCursor(2, 1);
+    lcdprint(poweroff);
+    delay(2000);
+    lcd.noBacklight();
+    strip.clear();
+    strip.show();  // вывод изменений на ленту
+    delay(1);
+    lcd.clear();
+    power.sleep(SLEEP_FOREVER);
+  } else {
+    if (!is_voltage_been) {
+      lcd.setCursor(4, 0);
+      lcdprint(battery);
+      lcd.setCursor(5, 1);
+      lcd.print(input_voltage);
+      is_voltage_been = 1;
+      delay(1500);
+    }
+  }
   strip.clear();
+  sdStatus = 0;
+  saStatus = 0;
+  doStatus = 0;
   //Draw menu
   cls();  //clear lcd and set cursor to 0,0
   int i = 0;
@@ -68,7 +96,7 @@ void config() {
   char* menu2[] = { teamcolors, defaulttime, testbl, setbrightness, testrelay };  // HERE YOU CAN ADD MORE ITEMS ON THE MENU
   delay(500);
   lcd.print(menu2[i]);
-  checkArrows(i, 4);
+  checkArrows(i, 3);
 
   while (1) {
     var = keypad.waitForKey();
@@ -77,7 +105,7 @@ void config() {
       i--;
       lcd.clear();
       lcdprint(menu2[i]);
-      checkArrows(i, 3);
+      checkArrows(i, 4);
       delay(50);
     }
     if (var == BT_DOWN && i < 4) {
@@ -85,7 +113,7 @@ void config() {
       i++;
       lcd.clear();
       lcdprint(menu2[i]);
-      checkArrows(i, 3);
+      checkArrows(i, 4);
       delay(50);
     }
     if (var == BT_CANCEL) {
@@ -139,9 +167,8 @@ void config() {
           lcd.clear();
           lcd.setCursor(0, 0);
           lcdprint(testbl);
-          for (int i = 0; i < NUMLEDS; i++) strip.set(i, mWheel8(i * 255 / NUMLEDS));  // полный круг от 0 до 255
-          strip.show();
-          delay(2000);
+          DoTestBacklight();
+          delay(1000);
           strip.clear();
           strip.show();
           config();
@@ -449,7 +476,7 @@ void configQuickGame() {
   cls();
   //ARMING TIME
   if (sdStatus || doStatus || saStatus) {
-    lcd.setCursor(2, 0);
+    lcd.setCursor(0, 0);
     lcdprint(armtime);
     lcd.setCursor(0, 1);
     checkArrows(1, 2);
@@ -457,7 +484,7 @@ void configQuickGame() {
 
     while (1) {
       lcd.clear();
-      lcd.setCursor(2, 0);
+      lcd.setCursor(0, 0);
       lcdprint(armtime);
       lcd.setCursor(0, 1);
       checkArrows(1, 2);

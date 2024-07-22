@@ -40,7 +40,7 @@ void sabotage() {
     //###########################CHECKINGS##################
 
     //Check If Game End
-    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0) {
+    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0 or minutos - aTime / 60000 >= 400000000) {
       lcd.clear();
       while (1) {
         lcd.setCursor(1, 0);
@@ -77,10 +77,13 @@ void sabotage() {
             strip.show();  // вывод изменений на ленту
             //
             if (sdStatus) {
+              aTime=0;
               startGameCount();
+              start = true;
               search();
             }
             if (saStatus) {
+              aTime=0;
               saStatus = true;
               startGameCount();
               start = true;  //
@@ -184,7 +187,7 @@ void destroySabotage() {
     if (endGame) {
       explodeSplash();
     }
-
+if (minutos - aTime / 60000 > 40000000) { explodeSplash(); }
     //Led Blink
 
     timeCalcVar = (millis() - iTime) % 1000;
@@ -214,7 +217,7 @@ void destroySabotage() {
     ////////HERE ARE THE TWO OPTIONS THAT ENDS THE GAME///////////
 
     ////TIME PASED AWAY AND THE BOMB EXPLODES
-    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0)  // Check if game ends
+    if (minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0 or minutos - aTime / 60000 >= 400000000)  // Check if game ends
     {
       explodeSplash();
     }
@@ -239,17 +242,20 @@ void destroySabotage() {
       lcdprint(enterpass);
 
       setCode();  // we need to set the compare variable first
+      if (minutos - aTime / 60000 > 400000000) { explodeSplash(); }
 
       //then compare :D
 
       if (comparePassword()) {
+        if (minutos - aTime / 60000 > 400000000) { explodeSplash(); }
         sabotage();
       }
       lcd.clear();
-      lcd.setCursor(2, 0);
+      lcd.setCursor(1, 0);
       lcdprint(passerror);
       if (soundEnable) tone(tonepin, errorTone, 200);
       delay(500);
+      if (minutos - aTime / 60000 > 400000000) { explodeSplash(); }
       cls();
     }
 
@@ -264,11 +270,13 @@ void destroySabotage() {
       unsigned int percent = 0;
       unsigned long xTime = millis();
       while (defuseando) {
+        if (minutos - aTime / 60000 > 400000000) { explodeSplash(); }
         keypad.getKey();
         //check if game time runs out during the disabling
         aTime = millis() - iTime;
         if ((minutos - aTime / 60000 == 0 && 59 - ((aTime / 1000) % 60) == 0) || minutos - aTime / 60000 > 4000000000) {
           endGame = true;
+          explodeSplash();
         }
         timeCalcVar = (millis() - xTime) % 1000;
         if (timeCalcVar >= 0 && timeCalcVar <= 20) {
@@ -289,6 +297,7 @@ void destroySabotage() {
         if (percent >= 100) {
           sabotage();
         }
+        if (minutos - aTime / 60000 > 400000000) { explodeSplash(); }
       }
       cls();
     }
